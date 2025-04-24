@@ -32,7 +32,11 @@ public class ListGraph<T> implements Graph<T> {
     if(getEdgeBetween(node1, node2) == null){
       throw new IllegalStateException("Edge already exists between " + node1 + " and " + node2);
     }
-    adjecencyList.get(node1).add(//List.add(edge)
+    Edge<T> edge1 = new EdgeImpl(node2, name, weight);
+    Edge<T> edge2 = new EdgeImpl(node1, name, weight);
+    
+    adjecencyList.get(node1).add(edge1);
+    adjecencyList.get(node2).add(edge2);
   }
 
   @Override
