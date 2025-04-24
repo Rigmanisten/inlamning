@@ -1,19 +1,38 @@
 package se.su.inlupp;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ListGraph<T> implements Graph<T> {
 
+  //Vi valde att använda List före Set främst för att ha mindre begränsningar och vara mer expanderbar.
+  //Om vi skulle behöva introducera multi-graph eller använde oss av någon ordning i framtiden så är List mer lämplig.
+  //Set skulle vara marginellt mer effektiv men den skulle samtidigt vara mer strikt att implementera.
+
+  private Map<T, List<Edge<T>>> adjecencyList;
+
+  public ListGraph() {
+    adjecencyList = new HashMap<>();
+  }
+
   @Override
   public void add(T node) {
-    throw new UnsupportedOperationException("Unimplemented method 'add'");
+    if (!adjecencyList.containsKey(node)) {
+      adjecencyList.put(node, new ArrayList<>());
+    }
   }
 
   @Override
   public void connect(T node1, T node2, String name, int weight) {
-    throw new UnsupportedOperationException("Unimplemented method 'connect'");
+    if (!adjecencyList.containsKey(node1) || !adjecencyList.containsKey(node2)) {
+      throw new NoSuchElementException();
+    }
+    if(weight < 0){
+      throw new IllegalArgumentException("weight must be positive");
+    }
+    if(getEdgeBetween(node1, node2) == null){
+      throw new IllegalStateException("Edge already exists between " + node1 + " and " + node2);
+    }
+    adjecencyList.get(node1).add(//List.add(edge)
   }
 
   @Override
@@ -33,7 +52,15 @@ public class ListGraph<T> implements Graph<T> {
 
   @Override
   public Edge<T> getEdgeBetween(T node1, T node2) {
-    throw new UnsupportedOperationException("Unimplemented method 'getEdgeBetween'");
+    if (!adjecencyList.containsKey(node1) || !adjecencyList.containsKey(node2)) {
+      throw new NoSuchElementException();
+    }
+    for(Edge<T> edge : adjecencyList.get(node1)){
+      if(edge.getDestination().equals(node2)){
+        return edge;
+      }
+    }
+    return null;
   }
 
   @Override
