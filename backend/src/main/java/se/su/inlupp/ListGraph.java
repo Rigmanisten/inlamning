@@ -94,10 +94,12 @@ public class ListGraph<T> implements Graph<T> {
     if(!adjecencyList.containsKey(node)){
       throw new NoSuchElementException();
     }
-    for(Edge<T> edge : adjecencyList.get(node)){
+
+    List<Edge<T>> edgesCopy = new ArrayList<>(adjecencyList.get(node));
+    for(Edge<T> edge : edgesCopy){  // kan vara ett problem med att vi manuplerar edges medans vi loppar edges
       disconnect(node, edge.getDestination());
     }
-    
+
     adjecencyList.remove(node);
   }
 
