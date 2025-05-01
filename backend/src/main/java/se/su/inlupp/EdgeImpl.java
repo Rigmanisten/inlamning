@@ -42,5 +42,7 @@ public class EdgeImpl<T> implements Edge<T> {
         if (weight < 0) {
             throw new IllegalArgumentException("Must be posetive");
         }
+        this.weight = weight;
+
     }
 }
