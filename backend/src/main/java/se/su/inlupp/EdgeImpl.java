@@ -10,12 +10,9 @@ public class EdgeImpl<T> implements Edge<T> {
         if (weight < 0) {
             throw new IllegalArgumentException("weight must be posetive");
         }
-
-
         this.destination = destination;
         this.name = name;
         this.weight = weight;
-
     }
 
     @Override
