@@ -17,7 +17,7 @@ public class ListGraph<T> implements Graph<T> {
   @Override
   public void add(T node) {
     if (!adjecencyList.containsKey(node)) {
-      adjecencyList.put(node, new ArrayList<>());
+      adjecencyList.put(node, new ArrayList<>());  //addIFAbssent
     }
   }
 
@@ -51,7 +51,14 @@ public class ListGraph<T> implements Graph<T> {
 
   @Override
   public Collection<Edge<T>> getEdgesFrom(T node) {
-    throw new UnsupportedOperationException("Unimplemented method 'getEdgesFrom'");
+    if(!adjecencyList.containsKey(node)){
+      throw new NoSuchElementException();
+    }
+    List<Edge<T>> result = new ArrayList<>();
+    for(Edge<T> edge : adjecencyList.get(node)){
+      result.add(edge);
+    }
+    return Collections.unmodifiableCollection(result);
   }
 
   @Override
@@ -69,12 +76,29 @@ public class ListGraph<T> implements Graph<T> {
 
   @Override
   public void disconnect(T node1, T node2) {
-    throw new UnsupportedOperationException("Unimplemented method 'disconnect'");
+    if (!adjecencyList.containsKey(node1) || !adjecencyList.containsKey(node2)) {
+      throw new NoSuchElementException();
+    }
+    if (getEdgeBetween(node1, node2)== null){
+      throw new IllegalStateException("Edge dose not exists between " + node1 + " and " + node2);
+    }
+    Edge<T> edge1 = getEdgeBetween(node1, node2);
+    Edge<T> edge2 = getEdgeBetween(node2, node1);
+    
+    adjecencyList.get(node1).remove(edge1);
+    adjecencyList.get(node2).remove(edge2);
   }
 
   @Override
   public void remove(T node) {
-    throw new UnsupportedOperationException("Unimplemented method 'remove'");
+    if(!adjecencyList.containsKey(node)){
+      throw new NoSuchElementException();
+    }
+    for(Edge<T> edge : adjecencyList.get(node)){
+      disconnect(node, edge.getDestination());
+    }
+    
+    adjecencyList.remove(node);
   }
 
   @Override
