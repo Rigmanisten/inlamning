@@ -29,12 +29,12 @@ public class ListGraph<T> implements Graph<T> {
     if(weight < 0){
       throw new IllegalArgumentException("weight must be positive");
     }
-    if(getEdgeBetween(node1, node2) == null){
+    if(getEdgeBetween(node1, node2) != null){
       throw new IllegalStateException("Edge already exists between " + node1 + " and " + node2);
     }
     Edge<T> edge1 = new EdgeImpl<>(node2, name, weight);
     Edge<T> edge2 = new EdgeImpl<>(node1, name, weight);
-    
+
     adjacencyList.get(node1).add(edge1);
     adjacencyList.get(node2).add(edge2);
   }
@@ -42,16 +42,16 @@ public class ListGraph<T> implements Graph<T> {
   @Override
   public void setConnectionWeight(T node1, T node2, int weight) {
     if(!adjacencyList.containsKey(node1) || !adjacencyList.containsKey(node2) || (getEdgeBetween(node1, node2) == null)) {
-      throw new NoSuchElementException();
+      throw new NoSuchElementException("Node or edge not exists between " + node1 + " and " + node2);
     }
-    if(weight < 0){throw new IllegalArgumentException();}
+    if(weight < 0){throw new IllegalArgumentException("weight must be positive");}
     getEdgeBetween(node1, node2).setWeight(weight);
     getEdgeBetween(node2, node1).setWeight(weight);
   }
 
   @Override
   public Set<T> getNodes() {
-    return adjacencyList.keySet();
+    return new HashSet<>(adjacencyList.keySet());
   }
 
   @Override
@@ -80,7 +80,7 @@ public class ListGraph<T> implements Graph<T> {
     }
     Edge<T> edge1 = getEdgeBetween(node1, node2);
     Edge<T> edge2 = getEdgeBetween(node2, node1);
-    
+
     adjacencyList.get(node1).remove(edge1);
     adjacencyList.get(node2).remove(edge2);
   }
@@ -99,7 +99,8 @@ public class ListGraph<T> implements Graph<T> {
 
   @Override
   public boolean pathExists(T from, T to) {
-    return false;
+    List<Edge<T>> result = getPath(from, to);
+    return result != null;
   }
 
   private boolean Searcher(T current, T goal, Set<T> nodesVisited, Stack<T> path) {
@@ -150,5 +151,17 @@ public class ListGraph<T> implements Graph<T> {
     }
 
     return edges;
+  }
+
+  @Override
+  public String toString(){
+    StringBuilder sb = new StringBuilder();
+    for(T node : adjacencyList.keySet()){
+      sb.append(node.toString()).append(", ").append("\n");
+      for(Edge<T> edge: getEdgesFrom(node)) {
+        sb.append(edge.toString()).append(", ");
+      }
+    }
+    return sb.toString();
   }
 }
