@@ -28,11 +28,11 @@ public class Gui extends Application {
     Label label = new Label("Hello, JavaFX " + javafxVersion + " UwU, yaho yaho " + javaVersion + ".");
 
     // Create 3 buttons
-    Button fdnp = new Button("Find Path");
-    Button shco = new Button("Show Connection");
-    Button nwpl = new Button("New Place");
-    Button nwco = new Button("New Connection");
-    Button cco = new Button("Change Connection");
+    Button FindPathButton = new Button("Find Path");
+    Button ShowCoButton = new Button("Show Connection");
+    Button NewPlaceButton = new Button("New Place");
+    Button NewCoButton = new Button("New Connection");
+    Button ChangeCoButton = new Button("Change Connection");
 
     MenuBar fileBar = new MenuBar();
 
@@ -49,17 +49,17 @@ public class Gui extends Application {
 
 
     // Optional: Set actions for the buttons
-    fdnp.setOnAction(e -> System.out.println("Button One clicked!"));
-    shco.setOnAction(e -> System.out.println("Button Two clicked!"));
-    nwpl.setOnAction(e -> System.out.println("Button Three clicked!"));
-    nwco.setOnAction(e -> System.out.println("Button Two clicked!"));
-    cco.setOnAction(e -> System.out.println("Button Three clicked!"));
+    FindPathButton.setOnAction(e -> System.out.println("Button One clicked!"));
+    ShowCoButton.setOnAction(e -> System.out.println("Button Two clicked!"));
+    NewPlaceButton.setOnAction(e -> System.out.println("Button Three clicked!"));
+    NewCoButton.setOnAction(e -> System.out.println("Button Two clicked!"));
+    ChangeCoButton.setOnAction(e -> System.out.println("Button Three clicked!"));
 
     HBox navi = new HBox(0, fileBar); // spacing of 10 pixels
     navi.setAlignment(Pos.TOP_LEFT); // center the buttons horizontally
 
     // Put the buttons in an HBox (a horizontal row)
-    HBox buttonRow = new HBox(1, fdnp, shco, nwpl, nwco, cco); // spacing of 10 pixels
+    HBox buttonRow = new HBox(20, FindPathButton, ShowCoButton, NewPlaceButton, NewCoButton, ChangeCoButton); // spacing of 10 pixels
     buttonRow.setAlignment(Pos.CENTER); // center the buttons horizontally
 
     // Create a VBox to hold the button row and other content
