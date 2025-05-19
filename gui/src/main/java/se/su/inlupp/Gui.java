@@ -1,5 +1,11 @@
 package se.su.inlupp;
 
+// PROG2 VT2025, Inlämningsuppgift, del 2
+// Grupp 369
+// Einar Gurell eigu0369
+// Linus Sjöberg lisj4306
+// Tigris Lundgren tilu6961
+
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
