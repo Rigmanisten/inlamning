@@ -22,10 +22,10 @@ public class Gui extends Application {
     Label label = new Label("Hello, JavaFX " + javafxVersion + " UwU, yaho yaho " + javaVersion + ".");
 
     // Create 3 buttons
-    Button fdnp = new Button("Find path");
-    Button shco = new Button("show connection");
-    Button nwpl = new Button("new place");
-    Button nwco = new Button("new connection");
+    Button fdnp = new Button("Find Path");
+    Button shco = new Button("Show Connection");
+    Button nwpl = new Button("New Place");
+    Button nwco = new Button("New Connection");
     Button cco = new Button("Change Connection");
 
     MenuBar fileBar = new MenuBar();
