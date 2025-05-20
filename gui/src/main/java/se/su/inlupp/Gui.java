@@ -7,6 +7,7 @@ package se.su.inlupp;
 // Tigris Lundgren tilu6961
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -17,6 +18,7 @@ import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.util.Optional;
 
 public class Gui extends Application {
 
@@ -45,6 +47,7 @@ public class Gui extends Application {
 
     //ansluter knapparna till dess hjälpmetoder
     newMap.setOnAction(e -> openNewMap());
+    exit.setOnAction(e -> exit());
 
     //knappar skapas
     Button findPathButton = new Button("Find Path");
@@ -78,13 +81,15 @@ public class Gui extends Application {
     stage.setScene(scene);
     stage.setTitle("PathFinder");
     stage.show();
+
+    stage.setOnCloseRequest(e -> exit());
   }
 
   private void openNewMap () {
     FileChooser fileChooser = new FileChooser();
     fileChooser.setTitle("Open Map Image");
     fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+      new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
     );
     File selectedFile = fileChooser.showOpenDialog(stage);
 
@@ -119,6 +124,27 @@ public class Gui extends Application {
     stage.setHeight(image.getHeight() + 110);
   }
 
+
+  
+  private void exit(){
+    boolean saved = false; 
+
+    // lisener som kollar om något ändrats mellan sparingar, ska ändra saved
+    if(!saved){
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      alert.setTitle("Warning!");
+      alert.setHeaderText(null);
+      alert.setContentText("Unsaved changes, exit anyway?");
+      Optional<ButtonType> answer = alert.showAndWait();
+      if (answer.isPresent() && answer.get() == ButtonType.OK){
+        Platform.exit();
+      }
+      // Användaren klickade på OK
+    }else{
+    // exit program
+    Platform.exit();
+    }
+  }
 
   public static void main (String[]args){
     launch(args);
