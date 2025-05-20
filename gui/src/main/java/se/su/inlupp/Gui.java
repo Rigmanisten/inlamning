@@ -1,5 +1,7 @@
 package se.su.inlupp;
 
+import java.io.File;
+
 // PROG2 VT2025, Inlämningsuppgift, del 2
 // Grupp 369
 // Einar Gurell eigu0369
@@ -7,72 +9,100 @@ package se.su.inlupp;
 // Tigris Lundgren tilu6961
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class Gui extends Application {
 
+  //mapView och primaryStage behöver kunna nås från andra metoder och är därför deklarerade utanför start
+  private Stage stage;
+  private ImageView mapView;
+
+  @Override
   public void start(Stage stage) {
-    Graph<String> graph = new ListGraph<String>();
-    String javaVersion = System.getProperty("java.version");
-    String javafxVersion = System.getProperty("javafx.version");
+    this.stage = stage;
 
-    Label label = new Label("Hello, JavaFX " + javafxVersion + " UwU, yaho yaho " + javaVersion + ".");
+    //root behöver inte nås i någon annan metod, och skapas därför i start
+    BorderPane root = new BorderPane();
 
-    // Create 3 buttons
-    Button fdnp = new Button("Find Path");
-    Button shco = new Button("Show Connection");
-    Button nwpl = new Button("New Place");
-    Button nwco = new Button("New Connection");
-    Button cco = new Button("Change Connection");
-
-    MenuBar fileBar = new MenuBar();
-
+    //file menu skapas
+    MenuBar menuBar = new MenuBar();
     Menu fileMenu = new Menu("File");
-    MenuItem newMapItem = new MenuItem("New Map");
-    MenuItem openItem = new MenuItem("Open");
-    MenuItem saveItem = new MenuItem("Save");
-    MenuItem saveImageItem = new MenuItem("Save Image");
-    MenuItem exitItem = new MenuItem("Exit");
+    MenuItem newMap = new MenuItem("New Map");
+    MenuItem openMap = new MenuItem("Open");
+    MenuItem saveMapFile = new MenuItem("Save");
+    MenuItem saveMapImage = new MenuItem("Save Image");
+    MenuItem exit = new MenuItem("Exit");
 
-    fileBar.getMenus().add(fileMenu);
-    fileMenu.getItems().addAll(newMapItem, openItem, saveItem, saveImageItem, exitItem);
+    menuBar.getMenus().add(fileMenu);
+    fileMenu.getItems().addAll(newMap, openMap, saveMapFile, saveMapImage, exit);
 
+    //ansluter knapparna till dess hjälpmetoder
+    newMap.setOnAction(e -> openNewMap());
 
+    //knappar skapas
+    Button findPathButton = new Button("Find Path");
+    Button showConnectionButton = new Button("Show Connection");
+    Button newPlaceButton = new Button("New Place");
+    Button newConnectionButton = new Button("New Connection");
+    Button changeConnectionButton = new Button("Change Connection");
 
-    // Optional: Set actions for the buttons
-    fdnp.setOnAction(e -> System.out.println("Button One clicked!"));
-    shco.setOnAction(e -> System.out.println("Button Two clicked!"));
-    nwpl.setOnAction(e -> System.out.println("Button Three clicked!"));
-    nwco.setOnAction(e -> System.out.println("Button Two clicked!"));
-    cco.setOnAction(e -> System.out.println("Button Three clicked!"));
+    HBox buttonRow = new HBox(5, findPathButton, showConnectionButton, newPlaceButton, newConnectionButton, changeConnectionButton);
+    buttonRow.setAlignment(Pos.CENTER);
 
-    HBox navi = new HBox(0, fileBar); // spacing of 10 pixels
-    navi.setAlignment(Pos.TOP_LEFT); // center the buttons horizontally
+    //menu och knappar lägs i en i nav i toppen
+    VBox nav = new VBox(5, menuBar, buttonRow);
+    nav.setPadding(new Insets(5));
+    root.setTop(nav);
 
-    // Put the buttons in an HBox (a horizontal row)
-    HBox buttonRow = new HBox(1, fdnp, shco, nwpl, nwco, cco); // spacing of 10 pixels
-    buttonRow.setAlignment(Pos.CENTER); // center the buttons horizontally
-
-    // Create a VBox to hold the button row and other content
-    VBox root = new VBox(20, navi, buttonRow, label); // spacing of 20 pixels
-    root.setAlignment(Pos.TOP_CENTER);  // kommer blin problem senare med detta, root till grid pain
+    mapView = new ImageView();
+    root.setCenter(mapView);
 
     Scene scene = new Scene(root, 640, 480);
     stage.setScene(scene);
-    stage.setTitle("JavaFX with Top Button Row");
+    stage.setTitle("PathFinder");
     stage.show();
   }
 
-  public static void main(String[] args) {
+
+  private void openNewMap () {
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Open Map Image");
+    fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+    );
+    File selectedFile = fileChooser.showOpenDialog(stage);
+
+    if (selectedFile != null) {
+      Image image = new Image(selectedFile.toURI().toString());
+
+      mapView.setImage(image);
+      mapView.setFitWidth(image.getWidth());
+      mapView.setFitHeight(image.getHeight());
+    }
+    else {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("Error Opening File");
+      alert.setHeaderText(null);
+      alert.setContentText("You have not selected a working file.");
+      alert.showAndWait();
+    }
+  }
+
+  public static void main (String[]args){
     launch(args);
   }
 }
