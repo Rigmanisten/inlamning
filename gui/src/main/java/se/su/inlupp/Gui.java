@@ -1,7 +1,5 @@
 package se.su.inlupp;
 
-import java.io.File;
-
 // PROG2 VT2025, Inlämningsuppgift, del 2
 // Grupp 369
 // Einar Gurell eigu0369
@@ -15,15 +13,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.control.Button;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import java.io.File;
 
 public class Gui extends Application {
 
@@ -61,22 +54,31 @@ public class Gui extends Application {
     Button changeConnectionButton = new Button("Change Connection");
 
     HBox buttonRow = new HBox(5, findPathButton, showConnectionButton, newPlaceButton, newConnectionButton, changeConnectionButton);
+    buttonRow.setDisable(true);
+    buttonRow.setPadding(new Insets(5));
     buttonRow.setAlignment(Pos.CENTER);
 
     //menu och knappar lägs i en i nav i toppen
-    VBox nav = new VBox(5, menuBar, buttonRow);
-    nav.setPadding(new Insets(5));
+    VBox nav = new VBox(menuBar, buttonRow);
+
     root.setTop(nav);
 
     mapView = new ImageView();
     root.setCenter(mapView);
 
-    Scene scene = new Scene(root, 640, 480);
+    //skapar en listener som aktiverar knapparna, om bilden ändras
+    mapView.imageProperty().addListener((obs, oldImage, newImage) -> {
+      if (newImage != null) {
+        buttonRow.setDisable(false);
+      }
+    });
+
+    //scene skapas
+    Scene scene = new Scene(root, 550, 70);
     stage.setScene(scene);
     stage.setTitle("PathFinder");
     stage.show();
   }
-
 
   private void openNewMap () {
     FileChooser fileChooser = new FileChooser();
@@ -89,9 +91,13 @@ public class Gui extends Application {
     if (selectedFile != null) {
       Image image = new Image(selectedFile.toURI().toString());
 
+      //sätter en fast storlek på inladdade bilden
       mapView.setImage(image);
       mapView.setFitWidth(image.getWidth());
       mapView.setFitHeight(image.getHeight());
+
+      //ändrar scene storlek efter den inladdade bildens storlek
+      changeSceneSize(image);
     }
     else {
       Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -101,6 +107,18 @@ public class Gui extends Application {
       alert.showAndWait();
     }
   }
+
+  private void changeSceneSize (Image image) {
+    //om bild mindre bred än nav, gör inte scene storlek mindre
+    if(image.getWidth() < 550) {
+      stage.setWidth(550);
+    }
+    else {
+      stage.setWidth(image.getWidth() + 80);
+    }
+    stage.setHeight(image.getHeight() + 110);
+  }
+
 
   public static void main (String[]args){
     launch(args);
