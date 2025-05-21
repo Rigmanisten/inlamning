@@ -34,6 +34,7 @@ public class Gui extends Application  {
   private ImageView mapView;
   private Pane drawingPane;
   Graph<Location> graph = new ListGraph<Location>();
+   boolean saved = true;
 
   @Override
   public void start(Stage stage) {
@@ -89,6 +90,7 @@ public class Gui extends Application  {
         mapPlaceClick(mouseEvent.getX(), mouseEvent.getY());
       });
       buttonRow.setDisable(false);
+      saved = false;
     });
 
 
@@ -155,10 +157,7 @@ public class Gui extends Application  {
     stage.setHeight(image.getHeight() + 110);
   }
 
-    private void mapPlaceClick(double x, double y){
-      System.out.println(x);
-      System.out.println(y);
-      
+    private void mapPlaceClick(double x, double y){      
       TextInputDialog dialog = new TextInputDialog();
       dialog.setTitle("Name");
       dialog.setHeaderText(null);
@@ -166,9 +165,9 @@ public class Gui extends Application  {
 
       Optional<String> input = dialog.showAndWait();
       input.ifPresent(name -> {
-        //creat and add loaction
-          Location location = new Location(name, x, y);
-          graph.add(location);
+        //creat and add loaction to graph
+        Location location = new Location(name, x, y);
+        graph.add(location);
         //Draw on map
         Circle place = new Circle(x,y, 12 , Color.BLUE); 
         Text placeName = new Text(x+1, y+21, name);
@@ -188,7 +187,7 @@ public class Gui extends Application  {
     }
   
   private void exit(){
-    boolean saved = true; // intal true //  skulle kunna sätta utanför metoden
+    //boolean saved = true; // intal true //  skulle kunna sätta utanför metoden
 
     // lisener som kollar om något ändrats mellan sparingar, ska ändra saved
     if(!saved){
