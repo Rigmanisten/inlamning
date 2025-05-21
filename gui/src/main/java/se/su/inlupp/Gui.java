@@ -10,21 +10,30 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.util.Optional;
 
-public class Gui extends Application {
+public class Gui extends Application  {
 
   //mapView och primaryStage behöver kunna nås från andra metoder och är därför deklarerade utanför start
   private Stage stage;
   private ImageView mapView;
+  private Pane drawingPane;
+  Graph<Location> graph = new ListGraph<Location>();
 
   @Override
   public void start(Stage stage) {
@@ -32,7 +41,12 @@ public class Gui extends Application {
 
     //root behöver inte nås i någon annan metod, och skapas därför i start
     BorderPane root = new BorderPane();
-
+    mapView = new ImageView();
+    drawingPane = new Pane();
+    drawingPane.setPickOnBounds(false);
+    StackPane mapStack = new StackPane(mapView, drawingPane);
+    root.setCenter(mapStack);
+    
     //file menu skapas
     MenuBar menuBar = new MenuBar();
     Menu fileMenu = new Menu("File");
@@ -47,6 +61,9 @@ public class Gui extends Application {
 
     //ansluter knapparna till dess hjälpmetoder
     newMap.setOnAction(e -> openNewMap());
+    //openMap.setOnAction(e-> openMap());
+    //saveMapFile.setOnAction(e-> saveFile());
+    //saveMapFile.setOnAction(e-> saveImage());
     exit.setOnAction(e -> exit());
 
     //knappar skapas
@@ -56,18 +73,28 @@ public class Gui extends Application {
     Button newConnectionButton = new Button("New Connection");
     Button changeConnectionButton = new Button("Change Connection");
 
+
     HBox buttonRow = new HBox(5, findPathButton, showConnectionButton, newPlaceButton, newConnectionButton, changeConnectionButton);
     buttonRow.setDisable(true);
     buttonRow.setPadding(new Insets(5));
     buttonRow.setAlignment(Pos.CENTER);
 
+    newPlaceButton.setOnAction(e-> {
+      mapView.setCursor(Cursor.CROSSHAIR);
+      buttonRow.setDisable(true);
+
+      mapView.setOnMouseClicked(mouseEvent -> {
+        mapView.setCursor(Cursor.DEFAULT);
+        mapView.setOnMouseClicked(null);
+        mapPlaceClick(mouseEvent.getX(), mouseEvent.getY());
+      });
+      buttonRow.setDisable(false);
+    });
+
+
     //menu och knappar lägs i en i nav i toppen
     VBox nav = new VBox(menuBar, buttonRow);
-
     root.setTop(nav);
-
-    mapView = new ImageView();
-    root.setCenter(mapView);
 
     //skapar en listener som aktiverar knapparna, om bilden ändras
     mapView.imageProperty().addListener((obs, oldImage, newImage) -> {
@@ -101,6 +128,10 @@ public class Gui extends Application {
       mapView.setFitWidth(image.getWidth());
       mapView.setFitHeight(image.getHeight());
 
+      drawingPane.setMinSize(image.getWidth(), image.getHeight());
+      drawingPane.setMaxSize(image.getWidth(), image.getHeight());
+      drawingPane.setPrefSize(image.getWidth(), image.getHeight());
+
       //ändrar scene storlek efter den inladdade bildens storlek
       changeSceneSize(image);
     }
@@ -124,10 +155,40 @@ public class Gui extends Application {
     stage.setHeight(image.getHeight() + 110);
   }
 
+    private void mapPlaceClick(double x, double y){
+      System.out.println(x);
+      System.out.println(y);
+      
+      TextInputDialog dialog = new TextInputDialog();
+      dialog.setTitle("Name");
+      dialog.setHeaderText(null);
+      dialog.setContentText("Name of place:");
 
+      Optional<String> input = dialog.showAndWait();
+      input.ifPresent(name -> {
+        //creat and add loaction
+          Location location = new Location(name, x, y);
+          graph.add(location);
+        //Draw on map
+        Circle place = new Circle(x,y, 12 , Color.BLUE); 
+        Text placeName = new Text(x+1, y+21, name);
+        placeName.setMouseTransparent(true);
+        placeName.setStyle
+        ("-fx-font-size: 14px; -fx-fill: black; -fx-font-weight: bold;");
+        
+        Group PlaceNode = new Group(place, placeName);
+        drawingPane.getChildren().add(PlaceNode);
+      });
+      
+      //Alert placeName = new Alert(Alert.AlertType.CONFIRMATION);
+
+
+
+
+    }
   
   private void exit(){
-    boolean saved = false; 
+    boolean saved = true; // intal true //  skulle kunna sätta utanför metoden
 
     // lisener som kollar om något ändrats mellan sparingar, ska ändra saved
     if(!saved){
