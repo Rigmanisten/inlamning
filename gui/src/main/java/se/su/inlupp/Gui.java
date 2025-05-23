@@ -96,6 +96,10 @@ public class Gui extends Application  {
       saved = false;
     });
 
+    newConnectionButton.setOnAction(e->{
+      CreateConnection();
+    });
+
 
     //menu och knappar lägs i en i nav i toppen
     VBox nav = new VBox(menuBar, buttonRow);
@@ -188,6 +192,37 @@ public class Gui extends Application  {
     } else if (selectedLocations.size() < 2) {
       selectedLocations.add(location);
       circle.setFill(Color.RED);
+    }
+  }
+
+  private void CreateConnection(){
+    if(selectedLocations.size() != 2){ // egen metod?
+      Alert errorAlert = new Alert(AlertType.ERROR);
+      errorAlert.setTitle("Error!");
+      errorAlert.setHeaderText(null);
+      errorAlert.setContentText("Two places must be selected!");
+      errorAlert.showAndWait();
+      return;
+    }
+    
+    Location from = selectedLocations.get(0);
+    Location to = selectedLocations.get(1);
+
+    if (graph.getEdgeBetween(from, to) != null){
+      Alert errorAlert = new Alert(AlertType.ERROR);
+      errorAlert.setTitle("Error!");
+      errorAlert.setHeaderText(null);
+      errorAlert.setContentText("Connection alredy exists!");
+      errorAlert.showAndWait();
+      return;
+    }
+
+    if(graph.getEdgeBetween(from, to) != null){
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setTitle("Connection");
+    dialog.setHeaderText("Connection from " + from.getName() + " to " + to.getName());
+    dialog.setContentText("Name:");
+    dialog.setContentText("Time:");
     }
   }
 
