@@ -107,6 +107,7 @@ public class Gui extends Application  {
       saved=false;
     });
     showConnectionButton.setOnAction(e->{showConnection();});
+    changeConnectionButton.setOnAction(e->{changeConnection();});
 
 
     //menu och knappar lägs i en i nav i toppen
@@ -218,7 +219,7 @@ public class Gui extends Application  {
     Location to = selectedLocations.get(1);
 
     if (graph.getEdgeBetween(from, to) != null){
-      showError("Connection alredy exists!");
+      showError("Connection already exists!");
       return;
     }
 
@@ -255,11 +256,11 @@ public class Gui extends Application  {
       try{
         time = Integer.parseInt(timeText);
         if (time < 0){
-          showError("Must be posetiv time!");
+          showError("Must be positive time!");
           return;
         }
       } catch (NumberFormatException e) {
-        showError("Time must be a integer");
+        showError("Time must be a legal integer");
         return;
       }
 
@@ -271,23 +272,15 @@ public class Gui extends Application  {
     }
   }
 
-  private void showConnection() {
-    if(selectedLocations.size() != 2){
-      showError("Two places must be selected!");
-      return;
-    }
-
-    Location from = selectedLocations.get(0);
-    Location to = selectedLocations.get(1);
-
+  private Optional<Integer> showConnectionDialog(Location from, Location to, boolean allowedEditTime) {
     Edge<Location> edge = graph.getEdgeBetween(from, to);
     if (edge == null) {
       showError("No connection exists between the selected places.");
-      return;
+      return Optional.empty();
     }
 
-    Dialog<Void> dialog = new Dialog<>();
-    dialog.setTitle("Connection Information");
+    Dialog<ButtonType> dialog = new Dialog<>();
+    dialog.setTitle("Connection");
     dialog.setHeaderText("Connection from " + from.getName() + " to " + to.getName());
     dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
@@ -302,12 +295,64 @@ public class Gui extends Application  {
     window.add(nameField, 1,0);
 
     window.add(new Label("Time"),0,1);
-    TextField timeField = new TextField(String.valueOf(edge.getWeight()));
-    timeField.setEditable(false);
-    window.add(timeField,1,1);
+    String timeValue;
+    //Om det är changeConnection som anropas, så läses timeField in som tom.
+    //Om det är showConnection som anropas, så läses timeField in med data.
+    if (allowedEditTime) {
+      timeValue = "";
+    } else {
+      timeValue = String.valueOf(edge.getWeight());
+    }
+    TextField timeField = new TextField(timeValue);
+    timeField.setEditable(allowedEditTime);
+    window.add(timeField, 1, 1);
 
     dialog.getDialogPane().setContent(window);
-    dialog.showAndWait();
+
+    Optional<ButtonType> result = dialog.showAndWait();
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+      if (!allowedEditTime) {
+        return Optional.empty();
+      }
+
+      String timeText = timeField.getText().trim();
+      try {
+        int time = Integer.parseInt(timeText);
+        if (time < 0) {
+          showError("Must be positive time!");
+          return Optional.empty();
+        }
+        return Optional.of(time);
+      } catch (NumberFormatException e) {
+        showError("Time must be an legal integer");
+        return Optional.empty();
+      }
+    }
+    return Optional.empty();
+  }
+
+  private void showConnection() {
+    if (selectedLocations.size() != 2) {
+      showError("Two places must be selected!");
+      return;
+    }
+
+    Location from = selectedLocations.get(0);
+    Location to = selectedLocations.get(1);
+    showConnectionDialog(from, to, false);
+  }
+
+  private void changeConnection() {
+    if (selectedLocations.size() != 2) {
+      showError("Two places must be selected!");
+      return;
+    }
+
+    Location from = selectedLocations.get(0);
+    Location to = selectedLocations.get(1);
+
+    Optional<Integer> newTime = showConnectionDialog(from, to, true);
+    newTime.ifPresent(time -> graph.setConnectionWeight(from, to, time));
   }
 
   private void showError (String meddelande){
