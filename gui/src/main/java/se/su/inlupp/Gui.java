@@ -21,13 +21,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Pair;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.security.auth.callback.LanguageCallback;
 
 public class Gui extends Application  {
 
@@ -98,6 +103,7 @@ public class Gui extends Application  {
 
     newConnectionButton.setOnAction(e->{
       CreateConnection();
+      saved=false;
     });
 
 
@@ -192,19 +198,17 @@ public class Gui extends Application  {
     if(selectedLocations.contains(location)) {
       selectedLocations.remove(location);
       circle.setFill(Color.BLUE);
+      System.out.println(selectedLocations.toString());
     } else if (selectedLocations.size() < 2) {
       selectedLocations.add(location);
       circle.setFill(Color.RED);
+      System.out.println(selectedLocations.toString());
     }
   }
 
   private void CreateConnection(){
     if(selectedLocations.size() != 2){ // egen metod?
-      Alert errorAlert = new Alert(AlertType.ERROR);
-      errorAlert.setTitle("Error!");
-      errorAlert.setHeaderText(null);
-      errorAlert.setContentText("Two places must be selected!");
-      errorAlert.showAndWait();
+      showError("Two places must be selected!");
       return;
     }
     
@@ -212,22 +216,71 @@ public class Gui extends Application  {
     Location to = selectedLocations.get(1);
 
     if (graph.getEdgeBetween(from, to) != null){
-      Alert errorAlert = new Alert(AlertType.ERROR);
-      errorAlert.setTitle("Error!");
-      errorAlert.setHeaderText(null);
-      errorAlert.setContentText("Connection alredy exists!");
-      errorAlert.showAndWait();
+      showError("Connection alredy exists!");
       return;
     }
 
     if(graph.getEdgeBetween(from, to) != null){
-    TextInputDialog dialog = new TextInputDialog();
-    dialog.setTitle("Connection");
-    dialog.setHeaderText("Connection from " + from.getName() + " to " + to.getName());
-    dialog.setContentText("Name:");
-    dialog.setContentText("Time:");
+
+      Dialog<ButtonType> dialog = new Dialog<>();
+      dialog.setTitle("Connection");
+      dialog.setHeaderText("Connection from " + from.getName() + " to " + to.getName());
+      TextField nameField = new TextField();
+      TextField timeField = new TextField();
+
+      GridPane window = new GridPane();
+      window.setHgap(10);
+      window.setVgap(10);
+      window.setPadding(new Insets(20, 150, 10, 10));
+
+      window.add(new Label("Name"), 0 ,0);
+      window.add(nameField, 1,0);
+      window.add(new Label("Time"),0,1);
+      window.add(timeField,1,1);
+
+      dialog.getDialogPane().setContent(window);
+      dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+      Optional<ButtonType> result = dialog.showAndWait();
+      if (result.isPresent() && result.get() == ButtonType.OK){
+        String name = nameField.getText().trim();
+        String timeText = timeField.getText().trim();
+
+        if(name.isEmpty()){
+          showError("Name is Empty!");
+          return;
+        }
+
+        int time;
+        try{
+          time = Integer.parseInt(timeText);
+          if (time < 0){
+            showError("Must be posetiv time!");
+            return;
+          }     
+        } catch (NumberFormatException e) {
+          showError("Time must be a integer");
+          return;
+        }
+
+        graph.connect(from, to, name, time);
+        Line line = new Line(from.getX(), from.getY(), to.getX(), to.getY());
+        line.setStroke(Color.BLACK);
+        line.setStrokeWidth(2);
+        drawingPane.getChildren().add(line);
+      }
     }
   }
+
+
+    private void showError (String meddelande){
+      Alert errorAlert = new Alert(AlertType.ERROR);
+      errorAlert.setTitle("Error!");
+      errorAlert.setHeaderText(null);
+      errorAlert.setContentText(meddelande);
+      errorAlert.showAndWait();
+      return;
+    }
 
   private void exit(){
     //boolean saved = true; // intal true //  skulle kunna sätta utanför metoden
