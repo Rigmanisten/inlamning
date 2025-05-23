@@ -220,67 +220,63 @@ public class Gui extends Application  {
       return;
     }
 
-    if(graph.getEdgeBetween(from, to) != null){
+    Dialog<ButtonType> dialog = new Dialog<>();
+    dialog.setTitle("Connection");
+    dialog.setHeaderText("Connection from " + from.getName() + " to " + to.getName());
+    TextField nameField = new TextField();
+    TextField timeField = new TextField();
 
-      Dialog<ButtonType> dialog = new Dialog<>();
-      dialog.setTitle("Connection");
-      dialog.setHeaderText("Connection from " + from.getName() + " to " + to.getName());
-      TextField nameField = new TextField();
-      TextField timeField = new TextField();
+    GridPane window = new GridPane();
+    window.setHgap(10);
+    window.setVgap(10);
+    window.setPadding(new Insets(20, 150, 10, 10));
 
-      GridPane window = new GridPane();
-      window.setHgap(10);
-      window.setVgap(10);
-      window.setPadding(new Insets(20, 150, 10, 10));
+    window.add(new Label("Name"), 0 ,0);
+    window.add(nameField, 1,0);
+    window.add(new Label("Time"),0,1);
+    window.add(timeField,1,1);
 
-      window.add(new Label("Name"), 0 ,0);
-      window.add(nameField, 1,0);
-      window.add(new Label("Time"),0,1);
-      window.add(timeField,1,1);
+    dialog.getDialogPane().setContent(window);
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-      dialog.getDialogPane().setContent(window);
-      dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+    Optional<ButtonType> result = dialog.showAndWait();
+    if (result.isPresent() && result.get() == ButtonType.OK){
+      String name = nameField.getText().trim();
+      String timeText = timeField.getText().trim();
 
-      Optional<ButtonType> result = dialog.showAndWait();
-      if (result.isPresent() && result.get() == ButtonType.OK){
-        String name = nameField.getText().trim();
-        String timeText = timeField.getText().trim();
-
-        if(name.isEmpty()){
-          showError("Name is Empty!");
-          return;
-        }
-
-        int time;
-        try{
-          time = Integer.parseInt(timeText);
-          if (time < 0){
-            showError("Must be posetiv time!");
-            return;
-          }     
-        } catch (NumberFormatException e) {
-          showError("Time must be a integer");
-          return;
-        }
-
-        graph.connect(from, to, name, time);
-        Line line = new Line(from.getX(), from.getY(), to.getX(), to.getY());
-        line.setStroke(Color.BLACK);
-        line.setStrokeWidth(2);
-        drawingPane.getChildren().add(line);
+      if(name.isEmpty()){
+        showError("Name is Empty!");
+        return;
       }
+
+      int time;
+      try{
+        time = Integer.parseInt(timeText);
+        if (time < 0){
+          showError("Must be posetiv time!");
+          return;
+        }
+      } catch (NumberFormatException e) {
+        showError("Time must be a integer");
+        return;
+      }
+
+      graph.connect(from, to, name, time);
+      Line line = new Line(from.getX(), from.getY(), to.getX(), to.getY());
+      line.setStroke(Color.BLACK);
+      line.setStrokeWidth(3);
+      drawingPane.getChildren().add(line);
     }
   }
 
-
-    private void showError (String meddelande){
-      Alert errorAlert = new Alert(AlertType.ERROR);
-      errorAlert.setTitle("Error!");
-      errorAlert.setHeaderText(null);
-      errorAlert.setContentText(meddelande);
-      errorAlert.showAndWait();
-      return;
-    }
+  private void showError (String meddelande){
+    Alert errorAlert = new Alert(AlertType.ERROR);
+    errorAlert.setTitle("Error!");
+    errorAlert.setHeaderText(null);
+    errorAlert.setContentText(meddelande);
+    errorAlert.showAndWait();
+    return;
+  }
 
   private void exit(){
     //boolean saved = true; // intal true //  skulle kunna sätta utanför metoden
