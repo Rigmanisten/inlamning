@@ -118,7 +118,10 @@ public class Gui extends Application  {
     stage.setTitle("PathFinder");
     stage.show();
 
-    stage.setOnCloseRequest(e -> exit());
+    stage.setOnCloseRequest(e -> {
+      e.consume();
+      exit();
+    });
   }
 
   private void openNewMap () {
