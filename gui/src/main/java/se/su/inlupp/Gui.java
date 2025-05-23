@@ -30,6 +30,7 @@ import javafx.util.Pair;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.security.auth.callback.LanguageCallback;
@@ -105,6 +106,7 @@ public class Gui extends Application  {
       CreateConnection();
       saved=false;
     });
+    showConnectionButton.setOnAction(e->{showConnection();});
 
 
     //menu och knappar lägs i en i nav i toppen
@@ -267,6 +269,45 @@ public class Gui extends Application  {
       line.setStrokeWidth(3);
       drawingPane.getChildren().add(line);
     }
+  }
+
+  private void showConnection() {
+    if(selectedLocations.size() != 2){
+      showError("Two places must be selected!");
+      return;
+    }
+
+    Location from = selectedLocations.get(0);
+    Location to = selectedLocations.get(1);
+
+    Edge<Location> edge = graph.getEdgeBetween(from, to);
+    if (edge == null) {
+      showError("No connection exists between the selected places.");
+      return;
+    }
+
+    Dialog<Void> dialog = new Dialog<>();
+    dialog.setTitle("Connection Information");
+    dialog.setHeaderText("Connection from " + from.getName() + " to " + to.getName());
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+    GridPane window = new GridPane();
+    window.setHgap(10);
+    window.setVgap(10);
+    window.setPadding(new Insets(20, 150, 10, 10));
+
+    window.add(new Label("Name"), 0 ,0);
+    TextField nameField = new TextField(edge.getName());
+    nameField.setEditable(false);
+    window.add(nameField, 1,0);
+
+    window.add(new Label("Time"),0,1);
+    TextField timeField = new TextField(String.valueOf(edge.getWeight()));
+    timeField.setEditable(false);
+    window.add(timeField,1,1);
+
+    dialog.getDialogPane().setContent(window);
+    dialog.showAndWait();
   }
 
   private void showError (String meddelande){
