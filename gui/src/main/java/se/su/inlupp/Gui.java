@@ -108,6 +108,7 @@ public class Gui extends Application  {
     });
     showConnectionButton.setOnAction(e->{showConnection();});
     changeConnectionButton.setOnAction(e->{changeConnection();});
+    findPathButton.setOnAction(e ->{findPath();});
 
 
     //menu och knappar lägs i en i nav i toppen
@@ -201,11 +202,9 @@ public class Gui extends Application  {
     if(selectedLocations.contains(location)) {
       selectedLocations.remove(location);
       circle.setFill(Color.BLUE);
-      System.out.println(selectedLocations.toString());
     } else if (selectedLocations.size() < 2) {
       selectedLocations.add(location);
       circle.setFill(Color.RED);
-      System.out.println(selectedLocations.toString());
     }
   }
 
@@ -362,6 +361,41 @@ public class Gui extends Application  {
     errorAlert.setContentText(meddelande);
     errorAlert.showAndWait();
     return;
+  }
+
+  private void findPath(){
+    if (selectedLocations.size() != 2) {
+      showError("Two places must be selected!");
+      return;
+    }
+
+    Location from = selectedLocations.get(0);
+    Location to = selectedLocations.get(1);
+
+    if(!graph.pathExists(from, to)){
+      showError("No path exists between the selected places.");
+      return;
+    }
+
+    List<Edge<Location>> path = graph.getPath(from, to);
+    int tot = 0;
+    StringBuilder pathDescription = new StringBuilder();
+    for (Edge<Location> edge: path){
+      pathDescription.append("to ").append(edge.getDestination().getName())
+        .append(" by ").append(edge.getName())
+          .append(" takes ").append(edge.getWeight()).append("\n");
+      tot += edge.getWeight();
+    }
+    pathDescription.append("Total ").append(tot);
+
+    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    alert.setTitle("Message");
+    alert.setHeaderText("The Path from " + from.getName() + " to " + to.getName() + ":");
+    TextArea textArea = new TextArea(pathDescription.toString());
+    textArea.setEditable(false);
+    textArea.setWrapText(true);
+    alert.getDialogPane().setContent(textArea);
+    alert.showAndWait();
   }
 
   private void exit(){
