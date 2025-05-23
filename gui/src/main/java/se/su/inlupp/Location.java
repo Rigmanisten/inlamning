@@ -2,6 +2,7 @@ package se.su.inlupp;
 
 import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -22,6 +23,7 @@ public class Location {
 
         this.circle = new Circle(x,y, 12 , Color.BLUE);
         this.circle.setStroke(Color.BLACK);
+        this.circle.setStrokeWidth(2);
 
         this.label = new Text(x+1, y+21, name);
         this.label.setMouseTransparent(true);
@@ -32,7 +34,7 @@ public class Location {
         circle.setOnMouseClicked(handler);
     }
 
-    public Group getGraphics() {
+    public Group getGroup() {
         return new Group(circle, label);
     }
 

@@ -25,6 +25,8 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Gui extends Application  {
@@ -33,7 +35,9 @@ public class Gui extends Application  {
   private Stage stage;
   private ImageView mapView;
   private Pane drawingPane;
-  Graph<Location> graph = new ListGraph<Location>();
+  private Graph<Location> graph = new ListGraph<Location>();
+  private final List<Location> selectedLocations = new ArrayList<>();
+  private boolean saved = true;
 
   @Override
   public void start(Stage stage) {
@@ -46,7 +50,7 @@ public class Gui extends Application  {
     drawingPane.setPickOnBounds(false);
     StackPane mapStack = new StackPane(mapView, drawingPane);
     root.setCenter(mapStack);
-    
+
     //file menu skapas
     MenuBar menuBar = new MenuBar();
     Menu fileMenu = new Menu("File");
@@ -89,6 +93,7 @@ public class Gui extends Application  {
         mapPlaceClick(mouseEvent.getX(), mouseEvent.getY());
       });
       buttonRow.setDisable(false);
+      saved = false;
     });
 
 
@@ -116,7 +121,7 @@ public class Gui extends Application  {
     FileChooser fileChooser = new FileChooser();
     fileChooser.setTitle("Open Map Image");
     fileChooser.getExtensionFilters().addAll(
-      new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
     );
     File selectedFile = fileChooser.showOpenDialog(stage);
 
@@ -155,40 +160,39 @@ public class Gui extends Application  {
     stage.setHeight(image.getHeight() + 110);
   }
 
-    private void mapPlaceClick(double x, double y){
-      System.out.println(x);
-      System.out.println(y);
-      
-      TextInputDialog dialog = new TextInputDialog();
-      dialog.setTitle("Name");
-      dialog.setHeaderText(null);
-      dialog.setContentText("Name of place:");
+  private void mapPlaceClick(double x, double y){
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setTitle("Name");
+    dialog.setHeaderText(null);
+    dialog.setContentText("Name of place:");
 
-      Optional<String> input = dialog.showAndWait();
-      input.ifPresent(name -> {
-        //creat and add loaction
-          Location location = new Location(name, x, y);
-          graph.add(location);
-        //Draw on map
-        Circle place = new Circle(x,y, 12 , Color.BLUE); 
-        Text placeName = new Text(x+1, y+21, name);
-        placeName.setMouseTransparent(true);
-        placeName.setStyle
-        ("-fx-font-size: 14px; -fx-fill: black; -fx-font-weight: bold;");
-        
-        Group PlaceNode = new Group(place, placeName);
-        drawingPane.getChildren().add(PlaceNode);
-      });
-      
-      //Alert placeName = new Alert(Alert.AlertType.CONFIRMATION);
+    Optional<String> input = dialog.showAndWait();
+    input.ifPresent(name -> {
+      Location location = new Location(name, x, y);
+      graph.add(location);
 
+      //draws circle on map
+      drawingPane.getChildren().add(location.getGroup());
 
+      //makes circle clickable
+      location.setClickHandler(e -> handleLocationClick(location));
+    });
+  }
 
+  private void handleLocationClick(Location location) {
+    Circle circle = location.getCircle();
 
+    if(selectedLocations.contains(location)) {
+      selectedLocations.remove(location);
+      circle.setFill(Color.BLUE);
+    } else if (selectedLocations.size() < 2) {
+      selectedLocations.add(location);
+      circle.setFill(Color.RED);
     }
-  
+  }
+
   private void exit(){
-    boolean saved = true; // intal true //  skulle kunna sätta utanför metoden
+    //boolean saved = true; // intal true //  skulle kunna sätta utanför metoden
 
     // lisener som kollar om något ändrats mellan sparingar, ska ändra saved
     if(!saved){
@@ -202,8 +206,8 @@ public class Gui extends Application  {
       }
       // Användaren klickade på OK
     }else{
-    // exit program
-    Platform.exit();
+      // exit program
+      Platform.exit();
     }
   }
 
